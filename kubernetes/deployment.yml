@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp
+  labels:
+    app: wp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: wp
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 3
+  template:
+    metadata:
+      labels:
+        app: wp
+    spec:
+      containers:
+      - image: wordpress:5
+        name: wp
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: mysql
+        - name: WORDPRESS_DB_USER
+          value: app_wordpress
+        - name: WORDPRESS_DB_PASSWORD
+          value: RVomYwIj84UXljbJ4wU4p
+        - name: WORDPRESS_DB_NAME
+          value: db_wordpress
+        ports:
+        - containerPort: 80
+          name: wp
+        volumeMounts:
+        - name: data
+          mountPath: /var/www/html
+      volumes:
+      - name: data
+        nfs:
+          path: /data/wp
+          server: 10.0.0.1 # NFS IP Addr

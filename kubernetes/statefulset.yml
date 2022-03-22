@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  serviceName: mysql
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: mysql
+          image: mysql:5.7
+          ports:
+            - name: mysql
+              protocol: TCP
+              containerPort: 3306
+          env:
+            # We need kube secret in production
+            - name: MYSQL_ROOT_PASSWORD
+              value: 3YkIl57CJRgabIYr0E3KpwnO
+            - name: MYSQL_USER
+              value: app_wordpress
+            - name: MYSQL_PASSWORD
+              value: RVomYwIj84UXljbJ4wU4p
+            - name: MYSQL_DATABASE
+              value: db_wordpress
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        # Assume storageclass exist
+        storageClassName: standard
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
